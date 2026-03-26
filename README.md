@@ -67,9 +67,9 @@ SharePoint Lists:
 ## 📸 Screenshots
 
 ### Power Apps
-![New Ticket Screen](PowerApps/PowerappsNewTicketScreen)
-![My Ticket Screen](PowerApps/PowerappsMyTicketScreen)
-![Agent Screen](PowerApps/PowerappsAgentScreen)
+![New Ticket Screen](Powerapps/PowerappsNewTicketScreen)
+![My Ticket Screen](Powerapps/PowerappsMyTicketScreen)
+![Agent Screen](Powerapps/PowerappsAgentScreen)
 
 ## 🛠️ Tech Stack
 - Power Apps (Canvas App)
