@@ -67,13 +67,10 @@ SharePoint Lists:
 ## 📸 Screenshots
 
 ### Power Apps
-![Submit Screen](PowerApps/submit-screen.png)
+![New Ticket Screen](PowerApps/PowerappsNewTicketScreen)
+![My Ticket Screen](PowerApps/PowerappsMyTicketScreen)
+![Agent Screen](PowerApps/PowerappsAgentScreen)
 
-### Power Automate
-![Flow](PowerAutomate/auto-assign-flow.png)
-
-### Power BI
-![Dashboard](PowerBI/dashboard.png)
 ## 🛠️ Tech Stack
 - Power Apps (Canvas App)
 - Power Automate
