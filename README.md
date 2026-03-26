@@ -1,6 +1,7 @@
-# It-Helpdesk-Power-Platform
-End-to-end IT Help Desk system using Power Apps, Power Automate, SharePoint &amp; Power BI
 # IT Help Desk Ticketing System (Power Platform)
+
+End-to-end IT Help Desk system using Power Apps, Power Automate, SharePoint & Power BI with SLA tracking, workflow automation, and real-time analytics.
+
 
 ## 📌 Overview
 This project is an end-to-end IT Help Desk solution built using Microsoft Power Platform to manage support tickets, automate workflows, and provide real-time analytics.
