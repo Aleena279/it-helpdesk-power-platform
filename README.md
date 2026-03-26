@@ -64,8 +64,16 @@ SharePoint Lists:
 6. Power BI dashboard updates in real-time  
 
 ## 📸 Screenshots
-(Add screenshots from each folder here)
 
+### Power Apps
+![Submit Screen](PowerApps/submit-screen.png)
+<img width="1364" height="577" alt="PowerappsNewTicketScreen" src="https://github.com/user-attachments/assets/4bf2255b-309a-43eb-9938-29e8337fbdf2" />
+
+### Power Automate
+![Flow](PowerAutomate/auto-assign-flow.png)
+
+### Power BI
+![Dashboard](PowerBI/dashboard.png)
 ## 🛠️ Tech Stack
 - Power Apps (Canvas App)
 - Power Automate
