@@ -1,0 +1,135 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedsharepointonline_7c5ba"
+        },
+        "api": {
+          "name": "shared_sharepointonline"
+        }
+      },
+      "shared_office365": {
+        "runtimeSource": "embedded",
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedoffice365_789df"
+        },
+        "api": {
+          "name": "shared_office365"
+        }
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "When_an_item_is_created": {
+          "recurrence": {
+            "interval": 1,
+            "frequency": "Minute"
+          },
+          "splitOn": "@triggerOutputs()?['body/value']",
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://aleena468.sharepoint.com/sites/ITHelpDesk",
+              "table": "5561ca5b-bf71-48b7-acbd-ff1d0a152c01"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetOnNewItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          }
+        }
+      },
+      "actions": {
+        "Get_items": {
+          "runAfter": {},
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://aleena468.sharepoint.com/sites/ITHelpDesk",
+              "table": "7252a473-eabf-4d1b-a091-c9a514172bf3",
+              "$filter": "Category eq '@{triggerBody()?['Category/Value']}'",
+              "$top": 1
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          }
+        },
+        "For_each": {
+          "foreach": "@outputs('Get_items')?['body/value']",
+          "actions": {
+            "Update_item": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://aleena468.sharepoint.com/sites/ITHelpDesk",
+                  "table": "5561ca5b-bf71-48b7-acbd-ff1d0a152c01",
+                  "id": "@triggerBody()?['ID']",
+                  "item/AssignedTo/Claims": "@concat('i:0#.f|membership|',items('For_each')?['AgentEmail'])"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "PatchItem",
+                  "connectionName": "shared_sharepointonline"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "Get_items": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        },
+        "For_each_1": {
+          "foreach": "@outputs('Get_items')?['body/value']",
+          "actions": {
+            "Send_an_email_(V2)": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "emailMessage/To": "@items('For_each_1')?['AgentEmail']",
+                  "emailMessage/Subject": "[New Ticket]@{items('For_each_1')?['Title']} -@{triggerBody()?['Priority/Value']}Priority",
+                  "emailMessage/Body": "<p class=\"editor-paragraph\">Hello,<br><br>A new IT ticket has been assigned to you.</p><br><p class=\"editor-paragraph\">Ticket:</p><p class=\"editor-paragraph\">@{items('For_each_1')?['Title']}</p><p class=\"editor-paragraph\">Category:</p><p class=\"editor-paragraph\">@{items('For_each_1')?['Category/Value']}</p><p class=\"editor-paragraph\">Priority:</p><p class=\"editor-paragraph\">@{triggerBody()?['Priority/Value']}</p><p class=\"editor-paragraph\">Submitted By:</p><p class=\"editor-paragraph\">@{triggerBody()?['SubmittedBy/DisplayName']}</p><p class=\"editor-paragraph\">Description:</p><p class=\"editor-paragraph\">@{triggerBody()?['Description']}</p><br><p class=\"editor-paragraph\">Please log into the IT Help Desk app to action this ticket.</p>",
+                  "emailMessage/Importance": "Normal"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                  "operationId": "SendEmailV2",
+                  "connectionName": "shared_office365"
+                }
+              }
+            }
+          },
+          "runAfter": {
+            "For_each": [
+              "Succeeded"
+            ]
+          },
+          "type": "Foreach"
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -1,0 +1,175 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "api": {
+          "name": "shared_sharepointonline"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedsharepointonline_7c5ba"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_office365": {
+        "api": {
+          "name": "shared_office365"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedoffice365_789df"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "undefined",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "Recurrence": {
+          "type": "Recurrence",
+          "recurrence": {
+            "frequency": "Minute",
+            "interval": 1
+          }
+        }
+      },
+      "actions": {
+        "Get_items": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://aleena468.sharepoint.com/sites/ITHelpDesk",
+              "table": "5561ca5b-bf71-48b7-acbd-ff1d0a152c01",
+              "$filter": "Status eq 'Open' or Status eq 'In Progress'",
+              "$top": 500
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "runAfter": {}
+        },
+        "Apply_to_each": {
+          "type": "Foreach",
+          "foreach": "@outputs('Get_items')?['body/value']",
+          "actions": {
+            "HoursElapsed": {
+              "type": "Compose",
+              "inputs": "@div(sub(ticks(utcNow()),ticks(items('Apply_to_each')?['Created'])),36000000000)"
+            },
+            "Get_SLA_Limit": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "dataset": "https://aleena468.sharepoint.com/sites/ITHelpDesk",
+                  "table": "7c792c53-a3aa-451c-9bcc-619c62692aea",
+                  "$filter": "Title eq '@{items('Apply_to_each')?['Priority/Value']}'",
+                  "$top": 1
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                  "operationId": "GetItems",
+                  "connectionName": "shared_sharepointonline"
+                }
+              },
+              "runAfter": {
+                "HoursElapsed": [
+                  "Succeeded"
+                ]
+              }
+            }
+          },
+          "runAfter": {
+            "Get_items": [
+              "Succeeded"
+            ]
+          },
+          "runtimeConfiguration": {
+            "concurrency": {
+              "repetitions": 1
+            }
+          }
+        },
+        "Condition": {
+          "type": "If",
+          "expression": {
+            "and": [
+              {
+                "greater": [
+                  "Outputs('HoursElapsed')",
+                  ""
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "For_each": {
+              "type": "Foreach",
+              "foreach": "@outputs('Get_items')?['body/value']",
+              "actions": {
+                "Update_item": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "dataset": "https://aleena468.sharepoint.com/sites/ITHelpDesk",
+                      "table": "5561ca5b-bf71-48b7-acbd-ff1d0a152c01",
+                      "id": "@items('For_each')?['ID']",
+                      "item/SLABreached": true
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+                      "operationId": "PatchItem",
+                      "connectionName": "shared_sharepointonline"
+                    }
+                  }
+                },
+                "Send_an_email_(V2)_1": {
+                  "type": "OpenApiConnection",
+                  "inputs": {
+                    "parameters": {
+                      "emailMessage/To": "AleenaThomas@Aleena468.onmicrosoft.com",
+                      "emailMessage/Subject": "SLA Breach  :  @{outputs('Update_item')?['body/Title']}- @{outputs('Update_item')?['body/Priority/Value']}Priority",
+                      "emailMessage/Body": "<p class=\"editor-paragraph\">URGENT — SLA Breach Detected<br><br>A ticket has exceeded its SLA time limit and requires immediate attention.<br><br>Ticket:<br>@{outputs('Update_item')?['body/Title']}<br>Priority:<br>@{outputs('Update_item')?['body/Priority/Value']}<br>Category:<br>@{outputs('Update_item')?['body/Category/Value']}<br>Submitted by:<br>@{outputs('Update_item')?['body/SubmittedBy/DisplayName']}<br>Hours open:<br>@{outputs('HoursElapsed')}<br><br><br>Please log into the IT Help Desk app and action this ticket immediately.</p>",
+                      "emailMessage/Importance": "Normal"
+                    },
+                    "host": {
+                      "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                      "operationId": "SendEmailV2",
+                      "connectionName": "shared_office365"
+                    }
+                  },
+                  "runAfter": {
+                    "Update_item": [
+                      "SUCCEEDED"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {
+            "Apply_to_each": [
+              "Succeeded"
+            ]
+          }
+        }
+      }
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}

@@ -1,0 +1,105 @@
+{
+  "properties": {
+    "connectionReferences": {
+      "shared_sharepointonline": {
+        "api": {
+          "name": "shared_sharepointonline"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedsharepointonline_7c5ba"
+        },
+        "runtimeSource": "embedded"
+      },
+      "shared_office365": {
+        "api": {
+          "name": "shared_office365"
+        },
+        "connection": {
+          "connectionReferenceLogicalName": "new_sharedoffice365_789df"
+        },
+        "runtimeSource": "embedded"
+      }
+    },
+    "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "contentVersion": "1.0.0.0",
+      "parameters": {
+        "$authentication": {
+          "defaultValue": {},
+          "type": "SecureObject"
+        },
+        "$connections": {
+          "defaultValue": {},
+          "type": "Object"
+        }
+      },
+      "triggers": {
+        "When_an_item_is_created_or_modified": {
+          "type": "OpenApiConnection",
+          "inputs": {
+            "parameters": {
+              "dataset": "https://aleena468.sharepoint.com/sites/ITHelpDesk",
+              "table": "5561ca5b-bf71-48b7-acbd-ff1d0a152c01"
+            },
+            "host": {
+              "apiId": "/providers/Microsoft.PowerApps/apis/shared_sharepointonline",
+              "operationId": "GetOnUpdatedItems",
+              "connectionName": "shared_sharepointonline"
+            }
+          },
+          "recurrence": {
+            "interval": 1,
+            "frequency": "Minute"
+          },
+          "splitOn": "@triggerOutputs()?['body/value']"
+        }
+      },
+      "actions": {
+        "Condition": {
+          "type": "If",
+          "expression": {
+            "or": [
+              {
+                "equals": [
+                  "@triggerBody()?['Status/Value']",
+                  "Resolved"
+                ]
+              },
+              {
+                "equals": [
+                  "@triggerBody()?['Status/Value']",
+                  "Closed"
+                ]
+              }
+            ]
+          },
+          "actions": {
+            "Send_an_email_(V2)": {
+              "type": "OpenApiConnection",
+              "inputs": {
+                "parameters": {
+                  "emailMessage/To": "@triggerBody()?['SubmittedBy/Email']",
+                  "emailMessage/Subject": "Your IT Ticket @{triggerBody()?['Title']} has been @{triggerBody()?['Status/Value']}",
+                  "emailMessage/Body": "<p class=\"editor-paragraph\">Hi @{triggerBody()?['SubmittedBy/DisplayName']},</p><br><p class=\"editor-paragraph\">Ticket:  @{triggerBody()?['Title']}<br><br>Status:  @{triggerBody()?['Status/Value']}<br><br>Resolved date: @{triggerBody()?['ResolvedDate']}<br><br>Agent notes: @{triggerBody()?['ResolutionNotes']}<br><br><br>Thank you for your patience. If you have further issues please submit a new ticket.</p>",
+                  "emailMessage/Importance": "Normal"
+                },
+                "host": {
+                  "apiId": "/providers/Microsoft.PowerApps/apis/shared_office365",
+                  "operationId": "SendEmailV2",
+                  "connectionName": "shared_office365"
+                }
+              }
+            }
+          },
+          "else": {
+            "actions": {}
+          },
+          "runAfter": {}
+        }
+      },
+      "outputs": {}
+    },
+    "templateName": null
+  },
+  "schemaVersion": "1.0.0.0"
+}
