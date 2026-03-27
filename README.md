@@ -67,7 +67,7 @@ SharePoint Lists:
 ## 📸 Screenshots
 
 ### Power Apps
-![New Ticket Screen](Powerapps/PowerappsNewTicketScreen)
+![New Ticket Screen](it-helpdesk-power-platform/Powerapps/PowerappsMyTicketScreen.PNG)
 ![My Ticket Screen](Powerapps/PowerappsMyTicketScreen)
 ![Agent Screen](Powerapps/PowerappsAgentScreen)
 
