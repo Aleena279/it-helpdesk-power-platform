@@ -66,9 +66,11 @@ SharePoint Lists:
 
 ## 📸 Screenshots
 
-### Power Apps
+### Power Apps New Ticket Screen
 <img width="1364" height="577" alt="PowerappsNewTicketScreen" src="https://github.com/user-attachments/assets/af1be51c-d89e-4160-88a3-4794d38efb88" />
+### Power Apps My Ticket Screen
 <img width="1366" height="572" alt="PowerappsMyTicketScreen" src="https://github.com/user-attachments/assets/93a19a0d-dcab-4d22-a0ba-1cedc00317c0" />
+### Power Apps Agent Screen
 <img width="1362" height="575" alt="PowerappsAgentScreen" src="https://github.com/user-attachments/assets/3b3ae67a-11fe-482d-814a-8d2f70d04b3b" />
 
 
